@@ -1,7 +1,7 @@
 
-import ChatBox from "./helpers/chatBox"
+import ChatBox from "../helpers/chatBox.js"
 
-
+import BasicButton from "../helpers/BasicButton.js"
 
 export default class Game extends Phaser.Scene {
     constructor() {
@@ -21,33 +21,64 @@ export default class Game extends Phaser.Scene {
         this.load.image('arrow1', 'src/assets/chat-sendarrow1.png');
         this.load.image('arrow2', 'src/assets/chat-sendarrow2.png');
 
-
+        this.load.spritesheet("arrows","src/assets/chat-sendarrow-sheet.png",{ frameWidth: 29, frameHeight: 28 });
 
     }
 
     create() {
 
-        this.notepad = new ChatBox();
-        this.notepad.render(5, 5, 'notepage','arrow1','arrow2');
+        let self = this;
 
+        this.self2 = this;
+
+        let noteX = 180;
+        let noteY = 180
+
+        self.notepad = new ChatBox(self, "Player");
+        self.notepad.render(noteX, noteY, 'notepage','arrow1','arrow2');
+
+
+        self.notepad_submitButton = new BasicButton({
+            'scene': this,
+            'key':'arrows',
+            'up': 0,
+            'over':1,
+            'down':1,
+            'x': noteX + 77,
+            'y': noteY + 98
+        })
 
         this.input.keyboard.on('keydown', function (event) {
 
-            //We are deleting a character.
+            //We are deleting a character.  keyCode 8 is the Delete Key.
             if (event.keyCode === 8)
             {
-
+                self.notepad.deleteCharacter();
             }
             //We are adding a character.
-            else if (event.keyCode === 32 || (event.keyCode >= 48 && event.keyCode < 90))
+            else if (event.keyCode === 32 || (event.keyCode >= 48 && event.keyCode <= 90))
             {
+
+                self.notepad.updateCurrentString(event.key);
+            }
+            //This refers to the ENTER character.
+            else if(event.keyCode === 13)
+            {
+                self.notepad.updateStrings();
 
             }
 
         });
 
 
+    self.notepad_submitButton.on('pointerdown',this.onPressed,this);
 
+
+    }
+
+    onPressed()
+    {
+        this.self2.notepad.updateStrings();
     }
 
     update() {
